@@ -37,6 +37,7 @@ class TBL:
         table.close()
         
     def searchAllRec(self):
+        self.recGroup=[]
         table=open(f"{self.tblName}.tbl","r")
         allLines=table.readlines()
         for line in allLines:
@@ -48,21 +49,33 @@ class TBL:
         for i in range(len(self.recGroup)):
             if searchvalue==self.recGroup[i][searchby]:
                 searchkey=self.recGroup[i]
-                break
-        return searchkey
+                return searchkey
+                
+        else:
+            return False
+    def searchAllbyKey(self,searchvalue,searchby):
+        searchlist=[]
+        for i in range(len(self.recGroup)):    
+            if searchvalue==self.recGroup[i][searchby]:    
+                searchlist.append(self.recGroup[i])
+        return searchlist
 
     def removeRec(self,delvalue,delby):
         for i in range(len(self.recGroup)):
-            if delvalue==self.recGroup[i][delby]:
+            if delvalue in self.recGroup[i][delby]:
                 del(self.recGroup[i])
-                break
+                return True
+        else:
+            return False
     
 
     def modifyRec(self,modifyvalue,modifyby,li):
         for i in range(len(self.recGroup)):
             if modifyvalue==self.recGroup[i][modifyby]:
                 self.recGroup[i]=li
-                break
+                return True
+        else:
+            return False
 
 
 class DB:
@@ -93,35 +106,75 @@ db.createDB()
 tblname="customerTBL"
 tblattribute=['ID','NAME','JOB','ADDR','CP','POINT']
 db.createTBL(tblname,tblattribute)
-
+tbl=TBL(tblname,tblattribute)
 while True:
     b=int(input("\n작업을 선택하세요.\n1. 고객 정보 입력\n2. 고객 아이디로 정보 수정\n3. 고객 아이디로 정보 삭제\n4. 고객 아이디로 정보 조회\n5. 고객명으로 정보 조회\n6. 특정 지역명으로 정보 조회\n0. 종료\n"))
     if b==1:
-        cInfo={"id":"","name":"","addr":"","job":"","CP":"","point":""}
+        cInfo={"id":"","name":"","job":"","addr":"","CP":"","point":""}
         print("\n고객 정보를 입력합니다.")
         cInfo['id']=input("고객 아이디: ")
         cInfo['name']=input("이름: ")
-        cInfo['addr']=input("주소: ")
         cInfo['job']=input("직업: ")
+        cInfo['addr']=input("주소: ")
         cInfo['cp']=input("전화번호: ")
         cInfo['point']=input("포인트: ")
-        tbl=TBL(tblname,tblattribute)
         tbl.addRec(cInfo)
         print("\n고객 정보가 입력되었습니다.\n")
     elif b==2:
-         findbyName=input("\n수정할 고객님의 아이디를 입력하세요: ")
-         if cInfo["name"]==findbyName:
-             print(f"\n{findbyName} 고객님의 고객 정보는 다음과 같습니다.")
-             print(f"\n고객 아이디: {cInfo['id']}\n이름: {cInfo['name']}\n주소: {cInfo['addr']}\n직업: {cInfo['job']}\n전화번호: {cInfo['CP']}\n")
-         else:
-             print(f"{findbyName} 고객님의 정보는 존재하지 않습니다.")
+        findbyID=input("\n삭제할 고객님의 아이디를 입력하세요: ")
+        tbl.searchAllRec()
+        isRemoved=tbl.removeRec(findbyID,0)
+        if isRemoved==True:
+            tbl.rewriteTBL()
+            print(f"\n{findbyID} 고객님의 정보가 삭제되었습니다.")
+        else:
+            print(f"\n{findbyID} 고객님의 정보는 존재하지 않습니다.")
+    
     elif b==3:
-         findbyID=input("\n조회할 고객 아이디를 입력하세요: ")
-         if cInfo["id"]==findbyID:
-             print(f"\n고객 아이디 {findbyID}의 정보는 다음과 같습니다.")
-             print(f"\n고객 아이디: {cInfo['id']}\n이름: {cInfo['name']}\n주소: {cInfo['addr']}\n직업: {cInfo['job']}\n전화번호: {cInfo['CP']}\n")
-         else:
-             print(f"{findbyID} 고객님의 정보는 존재하지 않습니다.")
+        findbyID=input("\n삭제할 고객님의 아이디를 입력하세요: ")
+        tbl.searchAllRec()
+        isRemoved=tbl.removeRec(findbyID,0)
+        if isRemoved==True:
+            tbl.rewriteTBL()
+            print(f"\n{findbyID} 고객님의 정보가 삭제되었습니다.")
+        else:
+            print(f"\n{findbyID} 고객님의 정보는 존재하지 않습니다.")
+        
+
+    elif b==4:
+        findbyID=input("\n조회할 고객님의 아이디를 입력하세요:")
+        tbl.searchAllRec()
+        customerinfo=tbl.searchRec(findbyID,0)
+        if customerinfo==False:
+            print(f"\n{findbyID} 고객님의 정보는 존재하지 않습니다.")
+        else:
+            print(f"\n{findbyID}님의 정보는 다음과 같습니다.")
+            print(f"\n고객 아이디: {customerinfo[0]}\n이름: {customerinfo[1]}\n직업: {customerinfo[2]}\n주소: {customerinfo[3]}\n전화번호: {customerinfo[4]}\n포인트: {customerinfo[5]}")
+             
+        
+
+    elif b==5:
+        findbyName=input("\n조회할 고객님의 이름을 입력하세요:")
+        tbl.searchAllRec()
+        customerinfo=tbl.searchRec(findbyName,0)
+        if customerinfo==False:
+            print(f"\n{findbyName} 고객님의 정보는 존재하지 않습니다.")
+        else:
+            print(f"\n{findbyName}님의 정보는 다음과 같습니다.")
+            print(f"\n고객 아이디: {customerinfo[0]}\n이름: {customerinfo[1]}\n직업: {customerinfo[2]}\n주소: {customerinfo[3]}\n전화번호: {customerinfo[4]}\n포인트: {customerinfo[5]}")
+
+    elif b==6:
+        findbyGeo=input("\n조회할 지역명을 입력하세요.")
+        tbl.searchAllRec()
+        customerinfolist=tbl.searchAllbyKey(findbyGeo,6)
+        if customerinfolist==[]:
+            print("\n고객이 존재하지 않습니다.")
+        else:
+            print(f"\n{findbyGeo} 고객님들의 아이디 목록입니다.")
+            for i in range(customerinfolist):
+                print(customerinfolist[i][0],end=",")
+
+                
     elif b==0:
         print("프로그램을 종료합니다.")
         break
