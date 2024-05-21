@@ -121,12 +121,12 @@ while True:
         tbl.addRec(cInfo)
         print("\n고객 정보가 입력되었습니다.\n")
     elif b==2:
-        findbyID=input("\n삭제할 고객님의 아이디를 입력하세요: ")
+        findbyID=input("\n수정할 고객님의 아이디를 입력하세요: ")
         tbl.searchAllRec()
-        isRemoved=tbl.removeRec(findbyID,0)
-        if isRemoved==True:
+        isModified=tbl.modifyRec(findbyID,0)
+        if isModified==True:
             tbl.rewriteTBL()
-            print(f"\n{findbyID} 고객님의 정보가 삭제되었습니다.")
+            print(f"\n{findbyID} 고객님의 정보가 수정되었습니다.")
         else:
             print(f"\n{findbyID} 고객님의 정보는 존재하지 않습니다.")
     
