@@ -25,14 +25,15 @@ class TBL:
         table=open(f"{self.tblName}.tbl","w")
         for num, i in enumerate(self.recGroup):
             if num+1 < len(self.recGroup):
-                table.write(', '.join(i) + "\n")
+                table.write(','.join(i) + "\n")
             else:
-                table.write(', '.join(i))
+                table.write(','.join(i))
         table.close()
 
     def addRec(self,dict):
         self.rec=dict
         table=open(f"{self.tblName}.TBL","a")
+        table.write("\n")
         table.write(",".join(list(self.rec.values())))
         table.close()
         
@@ -56,13 +57,13 @@ class TBL:
     def searchAllbyKey(self,searchvalue,searchby):
         searchlist=[]
         for i in range(len(self.recGroup)):    
-            if searchvalue==self.recGroup[i][searchby]:    
+            if searchvalue in self.recGroup[i][searchby]:    
                 searchlist.append(self.recGroup[i])
         return searchlist
 
     def removeRec(self,delvalue,delby):
         for i in range(len(self.recGroup)):
-            if delvalue in self.recGroup[i][delby]:
+            if delvalue == self.recGroup[i][delby]:
                 del(self.recGroup[i])
                 return True
         else:
@@ -92,8 +93,9 @@ class DB:
 
     def createTBL(self,tblName,attList):
         tbl = TBL(tblName,attList)
-        tbl.creatTBL()
-        self.tblList.append(tblName)
+        if os.path.exists(f"{tblName}.TBL")==False:
+            tbl.createTBL()
+            self.tblList.append(tblName)
     
     def deleteTBL(self,tblName,attList):
         tbl = TBL(tblName,attList)
@@ -108,9 +110,9 @@ tblattribute=['ID','NAME','JOB','ADDR','CP','POINT']
 db.createTBL(tblname,tblattribute)
 tbl=TBL(tblname,tblattribute)
 while True:
-    b=int(input("\n작업을 선택하세요.\n1. 고객 정보 입력\n2. 고객 아이디로 정보 수정\n3. 고객 아이디로 정보 삭제\n4. 고객 아이디로 정보 조회\n5. 고객명으로 정보 조회\n6. 특정 지역명으로 정보 조회\n0. 종료\n"))
+    b=int(input("\n작업을 선택하세요.\n1. 고객 정보 입력\n2. 고객 아이디로 정보 수정\n3. 고객 아이디로 정보 삭제\n4. 고객 아이디로 정보 조회\n5. 고객명으로 정보 조회\n6. 특정 지역명으로 아이디 조회\n0. 종료\n"))
     if b==1:
-        cInfo={"id":"","name":"","job":"","addr":"","CP":"","point":""}
+        cInfo={"id":"","name":"","job":"","addr":"","cp":"","point":""}
         print("\n고객 정보를 입력합니다.")
         cInfo['id']=input("고객 아이디: ")
         cInfo['name']=input("이름: ")
@@ -123,7 +125,15 @@ while True:
     elif b==2:
         findbyID=input("\n수정할 고객님의 아이디를 입력하세요: ")
         tbl.searchAllRec()
-        isModified=tbl.modifyRec(findbyID,0)
+        cInfo={"id":"","name":"","job":"","addr":"","cp":"","point":""}
+        print("고객 정보를 수정합니다")
+        cInfo['id']=input("고객 아이디: ")
+        cInfo['name']=input("이름: ")
+        cInfo['job']=input("직업: ")
+        cInfo['addr']=input("주소: ")
+        cInfo['cp']=input("전화번호: ")
+        cInfo['point']=input("포인트: ")
+        isModified=tbl.modifyRec(findbyID,0,list(cInfo.values()))
         if isModified==True:
             tbl.rewriteTBL()
             print(f"\n{findbyID} 고객님의 정보가 수정되었습니다.")
@@ -156,7 +166,7 @@ while True:
     elif b==5:
         findbyName=input("\n조회할 고객님의 이름을 입력하세요:")
         tbl.searchAllRec()
-        customerinfo=tbl.searchRec(findbyName,0)
+        customerinfo=tbl.searchRec(findbyName,1)
         if customerinfo==False:
             print(f"\n{findbyName} 고객님의 정보는 존재하지 않습니다.")
         else:
@@ -166,12 +176,12 @@ while True:
     elif b==6:
         findbyGeo=input("\n조회할 지역명을 입력하세요.")
         tbl.searchAllRec()
-        customerinfolist=tbl.searchAllbyKey(findbyGeo,6)
+        customerinfolist=tbl.searchAllbyKey(findbyGeo,3)
         if customerinfolist==[]:
-            print("\n고객이 존재하지 않습니다.")
+            print("\n지역에 고객이 존재하지 않습니다.")
         else:
-            print(f"\n{findbyGeo} 고객님들의 아이디 목록입니다.")
-            for i in range(customerinfolist):
+            print(f"\n{findbyGeo} 지역 고객님들의 아이디 목록입니다.")
+            for i in range(len(customerinfolist)):
                 print(customerinfolist[i][0],end=",")
 
                 
