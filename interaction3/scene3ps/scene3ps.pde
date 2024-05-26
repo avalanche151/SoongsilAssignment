@@ -11,18 +11,21 @@ class Scene3 {
     float dy = 0;
     float dz = 0;
     float g = 1.00002f;
-    float snakeX = 0;
-    float snakeY = 0;
+    float snakeX = 600;
+    float snakeY = 800;
     boolean isArrived = false;
     int snakeColor;
     float resarrowY = 0;
-
-
+    boolean canfire=true;
+    PImage snakeupward;
+    boolean ishit;
+    float moveparallel=400;
+    int gameFinished=0;
+    int hitcount=0;
+  
     void setup() {
         size(1200, 800);
-        snakeX = width / 2;
-        snakeY = height / 2;
-        snakeColor = color(255); // initial snake color is white
+        snakeupward=loadImage("file.png"); 
     }
 
     void draw() {
@@ -32,15 +35,26 @@ class Scene3 {
         target();
         arrow();
         gauge();
-
-        fill(0);
-        text(resPower % 100, 300, 100);
+        if(ishit){
+        textSize(48);
+        text("hit!",1000,200);
+        }
+        snakeY-=0.6;
+        if(snakeY<0){
+        gameFinished=2;
+        }
+        if(hitcount>5){
+          gameFinished=1;
+        }
+        if(gameFinished==1||gameFinished==2){
+        noLoop();
+        }
     }
 
     void target() {
         x = lerp(x, mouseX, 0.01f);
         y = lerp(y, mouseY, 0.01f);
-        pushMatrix();
+        pushStyle();
         fill(0, 0, 0, 0);
         strokeWeight(1);
         ellipse(x, y, 80, 80);
@@ -48,23 +62,30 @@ class Scene3 {
         line(x + 60, y, x + 20, y);
         line(x, y - 60, x, y - 20);
         line(x, y + 60, x, y + 20);
-        popMatrix();
+        popStyle();
     }
 
     void gauge() {
-        pushMatrix();
+        pushStyle();
         rectMode(CENTER);
         fill(255);
         rect(width / 2, height - 40, 500, 20);
-        if (mousePressed) {
-            fill(255, 0, 0);
-            rect(width / 2, height - 40, (power % 100) * 5, 20);
-            power += 1;
-        }
-        popMatrix();
+        popStyle();
     }
-
-    void mouseReleased() {
+    void mousePressed(){
+      pushStyle();
+      rectMode(CENTER);
+      fill(255, 0, 0);
+      if(mousePressed){
+      rect(width / 2, height - 40, (power % 100) * 5, 20);
+      power += 1;
+      ishit=false;
+      }
+      popStyle();
+    }
+    
+    void mouseReleased(){
+      if(canfire){
         resPower = power % 100;
         power = 0;
         arrowX = x;
@@ -72,6 +93,8 @@ class Scene3 {
         isArrowLaunched = true;
         dy = 0;
         dz = 0;
+        canfire=false;
+    }
     }
 
     void arrow() {
@@ -79,38 +102,56 @@ class Scene3 {
             dy = dy * g + 5 - 0.05f * resPower;
             dz = dz * g + 0.1f + 0.002f * resPower;
             resarrowY = arrowY + dy;
-            pushMatrix();
+            pushStyle();
             fill(255);
             rectMode(CENTER);
             rect(arrowX, arrowY + dy, 5 / dz, 80 / dz);
             rect(arrowX, arrowY + dy, 80 / dz, 5 / dz);
             fill(139, 69, 19); // brown color
             ellipse(arrowX, arrowY + dy, 30 / dz, 30 / dz);
-            popMatrix();
-            if (15 / dz < 2) {
-                isArrowLaunched = false;
+            popStyle();
+            if (25 / dz < 2) {
+                canfire=true;
                 isArrived = true;
+                isArrowLaunched = false;
+                
             }
         }
     }
 
     void snake() {
-        pushMatrix();
+        pushStyle();
         rectMode(CENTER);
+        imageMode(CENTER);
         fill(snakeColor);
-        snakeX = lerp(snakeX, random(snakeX - 300, snakeX + 300), 0.01f);
-        snakeY = lerp(snakeY, random(snakeY - 300, snakeY + 300), 0.01f);
-        rect(snakeX, snakeY, 100, 100);
+        if (frameCount % 120 == 0){
+        moveparallel=random(snakeX - 200,snakeX + 200);
+        }
+        snakeX = lerp(snakeX,moveparallel, 0.01);
+        
+        if(snakeX<0){
+          snakeX=0;
+        }
+        if(snakeX>width){
+          snakeX=height;
+        }
+        
+        pushMatrix();
+        fill(snakeColor);
+        image(snakeupward,snakeX, snakeY);
+        popMatrix();
         if (isArrived) {
-            if (arrowX < snakeX + 50 && arrowX > snakeX - 50 && resarrowY > snakeY - 50 && resarrowY < snakeY + 50) {
-                snakeColor = color(255, 0, 0); // red color
-                isArrived = false;
-            } else {
-                snakeColor = color(255); // white color
-                isArrived = false;
+            if (arrowX < snakeX + 70 && arrowX > snakeX - 70 && resarrowY > snakeY - 135 && resarrowY < snakeY + 135) {
+              ishit=true;
+              hitcount++;
+              isArrived = false;
+            }
+            else{
+              ishit=false;
+              isArrived=false;
             }
         }
-        popMatrix();
+        popStyle();
     }
 }
 Scene3 scene=new Scene3();
@@ -121,6 +162,7 @@ void setup(){
 
 void draw(){
   scene.draw();
+  scene.mousePressed();
 }
 void mouseReleased(){
   scene.mouseReleased();
